@@ -1,8 +1,34 @@
-import React from 'react';
+import React, { useState } from 'react';
 import MyContainer from './MyContainer';
 import { Link } from 'react-router';
+import { FaEye } from 'react-icons/fa';
+import { IoEyeOff } from 'react-icons/io5';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import auth from '../Firebase/firebase.init';
+import { toast } from 'react-toastify';
 
 const Signin = () => {
+
+  const [show, setShow] = useState(false)
+  const [user, setUser] = useState(null)
+
+  const handleSignin = (e) => {
+    e.preventDefault()
+    const email = e.target.email?.value
+    const password = e.target.password?.value
+
+    signInWithEmailAndPassword(auth, email, password)
+    .then(res => {
+      console.log(res)
+      setUser(res.user)
+      toast.success('SignIn Successfully')
+    })
+    .catch(err=>{
+      console.log(err)
+      toast.error(err.message)
+    })
+  }
+
     return (
         <div className="min-h-[calc(100vh-20px)] flex items-center justify-center bg-gradient-to-br from-blue-500 via-indigo-600 to-purple-600 relative overflow-hidden">
       {/* Animated glow orbs */}
@@ -26,8 +52,20 @@ const Signin = () => {
 
           {/* Login card */}
           <div className="w-full max-w-md backdrop-blur-lg bg-white/10 border border-white/20 shadow-2xl rounded-2xl p-8">
-              <form 
-            //   onSubmit={handleSignin} 
+              {user ? (<div className='text-center space-y-3'>
+
+                <img src={user?.photoURL || "https://via.placeholder.com/88"}
+                className='h-20 w-20 rounded-full mx-auto'
+                alt="" />
+
+                <h2 className='text-xl font-semibold'>{user?.displayName}</h2>
+                <p className='text-white/80'>{user?.email}</p>
+
+                <button className='my-btn'>Sign Out</button>
+
+              </div>) 
+              :(<form 
+              onSubmit={handleSignin} 
               className="space-y-5">
                 <h2 className="text-2xl font-semibold mb-2 text-center text-white">
                   Sign In
@@ -46,16 +84,16 @@ const Signin = () => {
                 <div className="relative">
                   <label className="block text-sm mb-1">Password</label>
                   <input
-                    type="password"
+                    type={show ? "text" : "password"}
                     name="password"
                     placeholder="••••••••"
                     className="input input-bordered w-full bg-white/20 text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-blue-400"
                   />
                   <span
-                    // onClick={() => setShow(!show)}
+                    onClick={() => setShow(!show)}
                     className="absolute right-[8px] top-[36px] cursor-pointer z-50"
                   >
-                    {/* {show ? <FaEye /> : <IoEyeOff />} */}
+                    {show ? <FaEye /> : <IoEyeOff />}
                   </span>
                 </div>
 
@@ -93,7 +131,7 @@ const Signin = () => {
                     Sign up
                   </Link>
                 </p>
-              </form>
+              </form>)}
           </div>
         </div>
       </MyContainer>
