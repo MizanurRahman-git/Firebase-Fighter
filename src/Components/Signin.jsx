@@ -3,7 +3,7 @@ import MyContainer from './MyContainer';
 import { Link } from 'react-router';
 import { FaEye } from 'react-icons/fa';
 import { IoEyeOff } from 'react-icons/io5';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup, signOut } from 'firebase/auth';
 import auth from '../Firebase/firebase.init';
 import { toast } from 'react-toastify';
 
@@ -26,6 +26,36 @@ const Signin = () => {
     .catch(err=>{
       console.log(err)
       toast.error(err.message)
+    })
+  }
+
+
+  const handleGoogleSignin = () =>{
+    const googleProvider = new GoogleAuthProvider();
+
+    signInWithPopup(auth, googleProvider)
+    .then(result => {
+      console.log(result.user)
+      setUser(result.user)
+      toast.success("Sign In Succesfully")
+    })
+    .catch(error => {
+      console.log(error)
+      toast.error(error.message)
+    })
+  }
+
+
+  const handleSignOut = () =>{
+    signOut(auth)
+    .then(result => {
+      console.log(result)
+      toast.success("Sign Out Successfully")
+      setUser(null)
+    })
+    .catch(error => {
+      console.log(error)
+      toast.error(error.message)
     })
   }
 
@@ -54,14 +84,14 @@ const Signin = () => {
           <div className="w-full max-w-md backdrop-blur-lg bg-white/10 border border-white/20 shadow-2xl rounded-2xl p-8">
               {user ? (<div className='text-center space-y-3'>
 
-                <img src={user?.photoURL || "https://via.placeholder.com/88"}
+                <img src={user?.photoURL}
                 className='h-20 w-20 rounded-full mx-auto'
                 alt="" />
 
                 <h2 className='text-xl font-semibold'>{user?.displayName}</h2>
                 <p className='text-white/80'>{user?.email}</p>
 
-                <button className='my-btn'>Sign Out</button>
+                <button onClick={handleSignOut} className='my-btn'>Sign Out</button>
 
               </div>) 
               :(<form 
@@ -111,7 +141,7 @@ const Signin = () => {
                 {/* Google Signin */}
                 <button
                   type="button"
-                //   onClick={handleGoogleSignin}
+                  onClick={handleGoogleSignin}
                   className="flex items-center justify-center gap-3 bg-white text-gray-800 px-5 py-2 rounded-lg w-full font-semibold hover:bg-gray-100 transition-colors cursor-pointer"
                 >
                   <img
